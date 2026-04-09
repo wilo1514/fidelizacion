@@ -35,7 +35,7 @@ export const config = {
     customerQuery: required("ICG_CUSTOMER_QUERY")
   },
   sap: {
-    baseUrl: required("SAP_SL_BASE_URL"),
+    baseUrl: required("SAP_SL_BASE_URL").replace(/\/+$/, ""),
     companyDb: required("SAP_SL_COMPANY_DB"),
     username: required("SAP_SL_USERNAME"),
     password: required("SAP_SL_PASSWORD"),

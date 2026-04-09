@@ -27,7 +27,8 @@ async function login(): Promise<SapLoginResult> {
   }
 
   if (!response.ok) {
-    throw new Error(`SAP login failed with status ${response.status}`);
+    const errorBody = await response.text();
+    throw new Error(`SAP login failed with status ${response.status}. Body: ${errorBody}`);
   }
 
   const cookies = response.headers.getSetCookie?.() ?? [];
@@ -59,7 +60,8 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
   });
 
   if (!queryResponse.ok) {
-    throw new Error(`SAP query failed with status ${queryResponse.status}`);
+    const errorBody = await queryResponse.text();
+    throw new Error(`SAP query failed with status ${queryResponse.status}. Body: ${errorBody}`);
   }
 
   const body = await queryResponse.json() as { value: Array<{ CardCode: string }> };
@@ -83,7 +85,8 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
     });
 
     if (!patchResponse.ok) {
-      throw new Error(`SAP patch failed with status ${patchResponse.status} for CardCode ${partner.CardCode}`);
+      const errorBody = await patchResponse.text();
+      throw new Error(`SAP patch failed with status ${patchResponse.status} for CardCode ${partner.CardCode}. Body: ${errorBody}`);
     }
 
     if (data.addressLine) {
@@ -93,7 +96,8 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
       });
 
       if (!addressResponse.ok) {
-        throw new Error(`SAP address query failed with status ${addressResponse.status} for CardCode ${partner.CardCode}`);
+        const errorBody = await addressResponse.text();
+        throw new Error(`SAP address query failed with status ${addressResponse.status} for CardCode ${partner.CardCode}. Body: ${errorBody}`);
       }
 
       const addressBody = await addressResponse.json() as {
@@ -123,7 +127,8 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
         );
 
         if (!addressPatchResponse.ok) {
-          throw new Error(`SAP address patch failed with status ${addressPatchResponse.status} for CardCode ${partner.CardCode}`);
+          const errorBody = await addressPatchResponse.text();
+          throw new Error(`SAP address patch failed with status ${addressPatchResponse.status} for CardCode ${partner.CardCode}. Body: ${errorBody}`);
         }
       }
     }
