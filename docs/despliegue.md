@@ -78,6 +78,22 @@ Si ICG y la base intermedia estan en el mismo SQL Server, igual conviene mantene
 - Crear un usuario tecnico.
 - Permitir solo consulta y actualizacion de Business Partners.
 
+## Cambio de horarios de sincronizacion
+
+Los horarios automaticos estan definidos en [scheduler.ts](C:\Users\William\Desktop\fidelizacion\apps\api\src\scheduler.ts).
+
+Actualmente:
+
+- `0 22 * * *` ejecuta a las 10:00 pm
+- `0 5 * * *` ejecuta a las 5:00 am
+
+Si quieres cambiarlos, modifica esas expresiones cron y vuelve a ejecutar:
+
+```powershell
+npm run build
+npm run start
+```
+
 ## Backend en el servidor
 
 ### Requisitos

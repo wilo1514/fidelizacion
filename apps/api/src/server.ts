@@ -9,6 +9,7 @@ import { seedDefaultAdmin, verifyAdminCredentials } from "./repositories/adminRe
 import { createQrSession, getSessionStatus } from "./services/qrService.js";
 import { confirmConsent, registerCustomerUpdate } from "./services/consentService.js";
 import { startScheduler } from "./scheduler.js";
+import { runSapSyncCycle } from "./services/sapSyncService.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -57,6 +58,20 @@ app.get("/api/admin/qr-sessions/:token", {
   }
 
   return session;
+});
+
+app.post("/api/admin/sap-sync/run", {
+  preHandler: authenticateAdmin
+}, async (_request, reply) => {
+  try {
+    await runSapSyncCycle();
+    return { ok: true, message: "Sincronizacion SAP ejecutada correctamente" };
+  } catch (error) {
+    return reply.code(500).send({
+      ok: false,
+      message: error instanceof Error ? error.message : "No fue posible ejecutar la sincronizacion SAP"
+    });
+  }
 });
 
 app.post("/api/public/register", async (request, reply) => {

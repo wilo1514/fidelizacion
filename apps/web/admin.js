@@ -2,6 +2,7 @@ const qrArea = document.getElementById("qrArea");
 const statusArea = document.getElementById("statusArea");
 const generateQrBtn = document.getElementById("generateQrBtn");
 const refreshStatusBtn = document.getElementById("refreshStatusBtn");
+const forceSapSyncBtn = document.getElementById("forceSapSyncBtn");
 const adminUsername = document.getElementById("adminUsername");
 const adminPassword = document.getElementById("adminPassword");
 
@@ -49,6 +50,27 @@ refreshStatusBtn?.addEventListener("click", async () => {
   }
   const data = await response.json();
   renderStatus(data);
+});
+
+forceSapSyncBtn?.addEventListener("click", async () => {
+  const response = await fetch("/api/admin/sap-sync/run", {
+    method: "POST",
+    headers: adminHeaders()
+  });
+
+  const data = await response.json();
+
+  if (response.status === 401) {
+    statusArea.innerHTML = "<p>Credenciales de administrador invalidas.</p>";
+    return;
+  }
+
+  if (!response.ok) {
+    statusArea.innerHTML = `<p>${data.message ?? "No fue posible ejecutar la sincronizacion SAP."}</p>`;
+    return;
+  }
+
+  statusArea.innerHTML = `<p>${data.message ?? "Sincronizacion SAP ejecutada correctamente."}</p>`;
 });
 
 function renderStatus(data) {

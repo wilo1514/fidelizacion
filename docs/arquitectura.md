@@ -20,6 +20,7 @@ El sistema debe permitir que un administrador genere un QR unico y temporal para
 7. El administrador recupera la respuesta y valida la aceptacion.
 8. A las `22:00` y `05:00`, el sistema intenta actualizar SAP B1 via Service Layer.
 9. Si no encuentra el cliente en SAP, queda en cola de reintento.
+10. El administrador puede forzar manualmente una corrida desde el panel cuando necesite validar una carga fuera del horario programado.
 
 ## Mapeo actual
 
