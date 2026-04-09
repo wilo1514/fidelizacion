@@ -38,7 +38,8 @@ export const config = {
     baseUrl: required("SAP_SL_BASE_URL"),
     companyDb: required("SAP_SL_COMPANY_DB"),
     username: required("SAP_SL_USERNAME"),
-    password: required("SAP_SL_PASSWORD")
+    password: required("SAP_SL_PASSWORD"),
+    rejectUnauthorized: process.env.SAP_SL_REJECT_UNAUTHORIZED !== "false"
   },
   smtp: {
     host: required("SMTP_HOST"),

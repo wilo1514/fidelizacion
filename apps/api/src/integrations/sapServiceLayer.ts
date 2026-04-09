@@ -1,20 +1,30 @@
 import { config } from "../config.js";
 
+if (!config.sap.rejectUnauthorized) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+}
+
 type SapLoginResult = {
   sessionId: string;
   routeId: string | null;
 };
 
 async function login(): Promise<SapLoginResult> {
-  const response = await fetch(`${config.sap.baseUrl}/Login`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      CompanyDB: config.sap.companyDb,
-      UserName: config.sap.username,
-      Password: config.sap.password
-    })
-  });
+  let response: Response;
+  try {
+    response = await fetch(`${config.sap.baseUrl}/Login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        CompanyDB: config.sap.companyDb,
+        UserName: config.sap.username,
+        Password: config.sap.password
+      })
+    });
+  } catch (error) {
+    const detail = error instanceof Error ? `${error.name}: ${error.message}` : "Unknown network error";
+    throw new Error(`SAP login request failed to ${config.sap.baseUrl}/Login. ${detail}`);
+  }
 
   if (!response.ok) {
     throw new Error(`SAP login failed with status ${response.status}`);

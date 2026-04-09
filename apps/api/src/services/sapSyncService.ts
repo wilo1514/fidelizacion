@@ -57,7 +57,9 @@ export async function runSapSyncCycle() {
           WHERE id = @queueId
         `);
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unknown SAP sync error";
+      const message = error instanceof Error
+        ? `${error.name}: ${error.message}`
+        : "Unknown SAP sync error";
       await pool.request()
         .input("queueId", mssql.UniqueIdentifier, row.queue_id)
         .input("lastError", mssql.NVarChar(mssql.MAX), message)
