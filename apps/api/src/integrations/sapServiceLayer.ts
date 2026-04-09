@@ -80,7 +80,7 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
       },
       body: JSON.stringify({
         Phone1: data.mobilePhone,
-        E_Mail: data.email
+        EmailAddress: data.email
       })
     });
 
