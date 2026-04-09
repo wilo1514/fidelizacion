@@ -15,6 +15,19 @@ const storageKey = "fidelizacion_admin_auth";
 const isLoginPage = Boolean(loginForm);
 const isDashboardPage = Boolean(generateQrBtn);
 
+function getStoredAuth() {
+  const raw = sessionStorage.getItem(storageKey);
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
 function saveAuth() {
   sessionStorage.setItem(storageKey, JSON.stringify({
     username: adminUsername?.value ?? "",
@@ -23,20 +36,20 @@ function saveAuth() {
 }
 
 function restoreAuth() {
-  const raw = sessionStorage.getItem(storageKey);
-  if (!raw) {
+  const auth = getStoredAuth();
+  if (!auth) {
     return false;
   }
 
-  const auth = JSON.parse(raw);
   if (adminUsername) adminUsername.value = auth.username ?? "";
   if (adminPassword) adminPassword.value = auth.password ?? "";
   return Boolean(auth.username && auth.password);
 }
 
 function adminHeaders() {
-  const username = adminUsername?.value ?? "";
-  const password = adminPassword?.value ?? "";
+  const stored = getStoredAuth();
+  const username = adminUsername?.value || stored?.username || "";
+  const password = adminPassword?.value || stored?.password || "";
   const basic = btoa(`${username}:${password}`);
   return {
     Authorization: `Basic ${basic}`
