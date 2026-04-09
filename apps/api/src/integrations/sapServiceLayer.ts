@@ -101,37 +101,43 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
 
       const addressBody = await addressResponse.json() as {
         CardCode: string;
-        BPAddresses?: Array<{ RowNum: number; AddressName: string; AdresType: string; Street: string }>;
+        BPAddresses?: Array<Record<string, unknown> & {
+          RowNum: number;
+          AddressName: string;
+          AdresType: string;
+          Street: string;
+        }>;
       };
 
-      const shippingAddresses = (addressBody.BPAddresses ?? []).filter((address) => address.AdresType === "S");
+      const addresses = addressBody.BPAddresses ?? [];
+      const hasShippingAddress = addresses.some((address) => address.AdresType === "S");
 
-      for (const address of shippingAddresses) {
-        const addressPatchResponse = await fetch(
-          `${config.sap.baseUrl}/BusinessPartners('${partner.CardCode}')`,
-          {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              Cookie: cookieHeader(session)
-            },
-            body: JSON.stringify({
-              BPAddresses: [
-                {
-                  RowNum: address.RowNum,
-                  AddressName: address.AddressName,
-                  AdresType: address.AdresType,
-                  Street: data.addressLine
-                }
-              ]
-            })
-          }
-        );
+      if (!hasShippingAddress) {
+        continue;
+      }
 
-        if (!addressPatchResponse.ok) {
-          const errorBody = await addressPatchResponse.text();
-          throw new Error(`SAP address patch failed with status ${addressPatchResponse.status} for CardCode ${partner.CardCode}. Body: ${errorBody}`);
+      const patchedAddresses = addresses.map((address) => ({
+        ...address,
+        Street: address.AdresType === "S" ? data.addressLine : address.Street
+      }));
+
+      const addressPatchResponse = await fetch(
+        `${config.sap.baseUrl}/BusinessPartners('${partner.CardCode}')`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Cookie: cookieHeader(session)
+          },
+          body: JSON.stringify({
+            BPAddresses: patchedAddresses
+          })
         }
+      );
+
+      if (!addressPatchResponse.ok) {
+        const errorBody = await addressPatchResponse.text();
+        throw new Error(`SAP address patch failed with status ${addressPatchResponse.status} for CardCode ${partner.CardCode}. Body: ${errorBody}`);
       }
     }
   }
