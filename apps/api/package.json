@@ -21,8 +21,10 @@
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
+    "@types/mssql": "^9.1.11",
     "@types/node": "^22.10.2",
     "@types/nodemailer": "^6.4.17",
+    "@types/qrcode": "^1.5.6",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2"
   }
