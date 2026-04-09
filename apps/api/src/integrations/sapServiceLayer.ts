@@ -127,7 +127,8 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
-            Cookie: cookieHeader(session)
+            Cookie: cookieHeader(session),
+            "B1S-ReplaceCollectionsOnPatch": "true"
           },
           body: JSON.stringify({
             BPAddresses: patchedAddresses
