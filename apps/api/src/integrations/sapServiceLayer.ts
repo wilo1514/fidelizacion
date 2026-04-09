@@ -9,6 +9,13 @@ type SapLoginResult = {
   routeId: string | null;
 };
 
+type SapBpAddress = Record<string, unknown> & {
+  RowNum: number;
+  AddressName: string;
+  AdresType: string;
+  Street: string;
+};
+
 async function login(): Promise<SapLoginResult> {
   let response: Response;
   try {
@@ -45,6 +52,24 @@ function cookieHeader(session: SapLoginResult) {
   return session.routeId
     ? `B1SESSION=${session.sessionId}; ROUTEID=${session.routeId}`
     : `B1SESSION=${session.sessionId}`;
+}
+
+async function getBusinessPartnerAddresses(session: SapLoginResult, cardCode: string) {
+  const response = await fetch(`${config.sap.baseUrl}/BusinessPartners('${cardCode}')?$select=CardCode,BPAddresses`, {
+    headers: { Cookie: cookieHeader(session) }
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    throw new Error(`SAP address query failed with status ${response.status} for CardCode ${cardCode}. Body: ${errorBody}`);
+  }
+
+  const body = await response.json() as {
+    CardCode: string;
+    BPAddresses?: SapBpAddress[];
+  };
+
+  return body.BPAddresses ?? [];
 }
 
 export async function updateBusinessPartnerByDocument(documentNumber: string, data: {
@@ -90,26 +115,7 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
     }
 
     if (data.addressLine) {
-      const addressResponse = await fetch(`${config.sap.baseUrl}/BusinessPartners('${partner.CardCode}')?$select=CardCode,BPAddresses`, {
-        headers: { Cookie: cookieHeader(session) }
-      });
-
-      if (!addressResponse.ok) {
-        const errorBody = await addressResponse.text();
-        throw new Error(`SAP address query failed with status ${addressResponse.status} for CardCode ${partner.CardCode}. Body: ${errorBody}`);
-      }
-
-      const addressBody = await addressResponse.json() as {
-        CardCode: string;
-        BPAddresses?: Array<Record<string, unknown> & {
-          RowNum: number;
-          AddressName: string;
-          AdresType: string;
-          Street: string;
-        }>;
-      };
-
-      const addresses = addressBody.BPAddresses ?? [];
+      const addresses = await getBusinessPartnerAddresses(session, partner.CardCode);
       const hasShippingAddress = addresses.some((address) => address.AdresType === "S");
 
       if (!hasShippingAddress) {
@@ -139,6 +145,17 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
       if (!addressPatchResponse.ok) {
         const errorBody = await addressPatchResponse.text();
         throw new Error(`SAP address patch failed with status ${addressPatchResponse.status} for CardCode ${partner.CardCode}. Body: ${errorBody}`);
+      }
+
+      const verifyAddresses = await getBusinessPartnerAddresses(session, partner.CardCode);
+      const shippingAddressesAfter = verifyAddresses.filter((address) => address.AdresType === "S");
+      const allUpdated = shippingAddressesAfter.every((address) => String(address.Street ?? "") === data.addressLine);
+
+      if (!allUpdated) {
+        throw new Error(
+          `SAP address patch was accepted but Street was not updated for CardCode ${partner.CardCode}. ` +
+          `Expected "${data.addressLine}". Current shipping addresses: ${JSON.stringify(shippingAddressesAfter)}`
+        );
       }
     }
   }
