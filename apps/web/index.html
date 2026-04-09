@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Administrador | Fidelizacion</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="layout admin-layout">
+      <section class="hero">
+        <p class="eyebrow">Mega Tienda del Sur</p>
+        <h1>Panel de actualizacion de clientes</h1>
+        <p class="lead">Genera un QR temporal, espera la confirmacion del cliente y valida la aceptacion de politica y sorteo.</p>
+      </section>
+
+      <section class="card">
+        <div class="credentials-grid">
+          <label>
+            <span>Usuario administrador</span>
+            <input id="adminUsername" type="text" autocomplete="username" />
+          </label>
+          <label>
+            <span>Clave</span>
+            <input id="adminPassword" type="password" autocomplete="current-password" />
+          </label>
+        </div>
+        <div class="actions">
+          <button id="generateQrBtn" class="button button-primary">Generar QR</button>
+          <button id="refreshStatusBtn" class="button button-secondary">Recuperar respuesta</button>
+        </div>
+
+        <div id="qrArea" class="qr-area">
+          <p>El QR aparecera aqui.</p>
+        </div>
+
+        <div id="statusArea" class="status-panel">
+          <p>Sin sesion activa.</p>
+        </div>
+      </section>
+    </main>
+    <script src="/admin.js" type="module"></script>
+  </body>
+  </html>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Actualiza tus datos</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="layout client-layout">
+      <section class="hero hero-client">
+        <p class="eyebrow">Mega Tienda del Sur</p>
+        <h1>Actualiza tus datos</h1>
+        <p class="lead">Confirma tu informacion para participar en promociones y sorteos.</p>
+      </section>
+
+      <section class="card form-card">
+        <form id="customerForm" class="form-grid">
+          <label>
+            <span>Nombres y apellidos</span>
+            <input type="text" name="fullName" required />
+          </label>
+          <label>
+            <span>Cedula, RUC o pasaporte</span>
+            <input type="text" name="documentNumber" required />
+          </label>
+          <label>
+            <span>Celular</span>
+            <input type="tel" name="mobilePhone" required />
+          </label>
+          <label>
+            <span>Correo</span>
+            <input type="email" name="email" required />
+          </label>
+          <button type="submit" class="button button-primary">Confirmar informacion</button>
+        </form>
+        <p id="formMessage" class="feedback"></p>
+      </section>
+    </main>
+
+    <dialog id="consentModal" class="modal">
+      <div class="modal-card">
+        <header class="modal-header">
+          <h2>CONFIRMA TU REGISTRO</h2>
+          <p>No te pierdas los premios que regala la Mega Tienda del Sur</p>
+        </header>
+        <div class="modal-body">
+          <div class="notice-box">
+            Al confirmar tu correo podras participar en promociones, recibir descuentos reales y estar al dia con las mejores ofertas de Mega Tienda del Sur.
+          </div>
+          <label class="consent-check">
+            <input id="acceptCheckbox" type="checkbox" />
+            <span>He leido y acepto la Politica de Proteccion de Datos, asi como las condiciones y bases del sorteo. Autorizo a Mega Tienda del Sur el uso de mis datos personales para gestionar mi participacion en promociones y sorteos, incluyendo la incorporacion de mi nombre en boletos. Asimismo, autorizo el envio de informacion comercial, ofertas y promociones a mi correo electronico y otros medios digitales. Declaro que esta autorizacion es libre, informada y voluntaria.</span>
+          </label>
+          <button id="confirmConsentBtn" class="button button-danger">Confirmar aceptacion</button>
+          <p class="modal-footnote">Esta aceptacion sera registrada con fecha, hora y validacion electronica como respaldo legal conforme a la normativa vigente en Ecuador. Podras retirar tu consentimiento en cualquier momento.</p>
+          <nav class="legal-links">
+            <a href="/politica-proteccion-datos.html" target="_blank" rel="noopener">Politica de Proteccion de Datos</a>
+            <a href="/condiciones-sorteo.html" target="_blank" rel="noopener">Condiciones del sorteo</a>
+          </nav>
+        </div>
+      </div>
+    </dialog>
+
+    <script src="/cliente.js" type="module"></script>
+  </body>
+  </html>
