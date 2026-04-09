@@ -90,8 +90,7 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
     }
 
     if (data.addressLine) {
-      const addressFilter = encodeURIComponent(`CardCode eq '${partner.CardCode.replace(/'/g, "''")}' and AdresType eq 'S'`);
-      const addressResponse = await fetch(`${config.sap.baseUrl}/BPAddresses?$select=RowNum,CardCode,AddressName,AdresType,Street&$filter=${addressFilter}`, {
+      const addressResponse = await fetch(`${config.sap.baseUrl}/BusinessPartners('${partner.CardCode}')?$select=CardCode,BPAddresses`, {
         headers: { Cookie: cookieHeader(session) }
       });
 
@@ -101,10 +100,13 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
       }
 
       const addressBody = await addressResponse.json() as {
-        value: Array<{ RowNum: number; CardCode: string; AddressName: string; AdresType: string; Street: string }>;
+        CardCode: string;
+        BPAddresses?: Array<{ RowNum: number; AddressName: string; AdresType: string; Street: string }>;
       };
 
-      for (const address of addressBody.value) {
+      const shippingAddresses = (addressBody.BPAddresses ?? []).filter((address) => address.AdresType === "S");
+
+      for (const address of shippingAddresses) {
         const addressPatchResponse = await fetch(
           `${config.sap.baseUrl}/BusinessPartners('${partner.CardCode}')`,
           {
