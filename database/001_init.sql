@@ -1,10 +1,10 @@
-IF DB_ID('Fidelizacion') IS NULL
+IF DB_ID('DB_Fidelizacion') IS NULL
 BEGIN
-    CREATE DATABASE Fidelizacion;
+    CREATE DATABASE DB_Fidelizacion;
 END
 GO
 
-USE Fidelizacion;
+USE DB_Fidelizacion;
 GO
 
 IF OBJECT_ID('dbo.admin_users', 'U') IS NULL
