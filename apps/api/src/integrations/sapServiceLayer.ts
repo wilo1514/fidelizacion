@@ -119,7 +119,10 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
       const hasShippingAddress = addresses.some((address) => address.AdresType === "S");
 
       if (!hasShippingAddress) {
-        continue;
+        throw new Error(
+          `SAP did not return any BPAddresses with AdresType 'S' for CardCode ${partner.CardCode}. ` +
+          `Addresses: ${JSON.stringify(addresses)}`
+        );
       }
 
       const patchedAddresses = addresses.map((address) => ({
@@ -149,12 +152,13 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
 
       const verifyAddresses = await getBusinessPartnerAddresses(session, partner.CardCode);
       const shippingAddressesAfter = verifyAddresses.filter((address) => address.AdresType === "S");
-      const allUpdated = shippingAddressesAfter.every((address) => String(address.Street ?? "") === data.addressLine);
+      const expectedStreet = data.addressLine.trim();
+      const allUpdated = shippingAddressesAfter.every((address) => String(address.Street ?? "").trim() === expectedStreet);
 
       if (!allUpdated) {
         throw new Error(
           `SAP address patch was accepted but Street was not updated for CardCode ${partner.CardCode}. ` +
-          `Expected "${data.addressLine}". Current shipping addresses: ${JSON.stringify(shippingAddressesAfter)}`
+          `Expected "${expectedStreet}". Current shipping addresses: ${JSON.stringify(shippingAddressesAfter)}`
         );
       }
     }
