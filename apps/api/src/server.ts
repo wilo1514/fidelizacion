@@ -6,16 +6,17 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config } from "./config.js";
 import { seedDefaultAdmin, verifyAdminCredentials } from "./repositories/adminRepository.js";
-import { createQrSession, getSessionStatus } from "./services/qrService.js";
+import { createQrSession, getPublicSessionData, getSessionStatus } from "./services/qrService.js";
 import { confirmConsent, registerCustomerUpdate } from "./services/consentService.js";
 import { startScheduler } from "./scheduler.js";
 import { runSapSyncCycle } from "./services/sapSyncService.js";
+import { getClientContext } from "./utils/clientContext.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const webRoot = path.resolve(__dirname, "../../web");
 
-const app = Fastify({ logger: true });
+const app = Fastify({ logger: true, trustProxy: true });
 
 await app.register(cors, { origin: true });
 await app.register(formBody);
@@ -43,9 +44,27 @@ async function authenticateAdmin(request: any, reply: any) {
 
 app.get("/health", async () => ({ ok: true }));
 
+app.post("/api/admin/login", {
+  preHandler: authenticateAdmin
+}, async () => ({ ok: true }));
+
 app.post("/api/admin/qr-sessions", {
   preHandler: authenticateAdmin
-}, async () => createQrSession());
+}, async (request, reply) => {
+  const body = request.body as { documentNumber?: string };
+
+  if (!body.documentNumber?.trim()) {
+    return reply.code(400).send({ message: "La cedula es obligatoria" });
+  }
+
+  try {
+    return await createQrSession(body.documentNumber.trim());
+  } catch (error) {
+    return reply.code(400).send({
+      message: error instanceof Error ? error.message : "No fue posible generar el QR"
+    });
+  }
+});
 
 app.get("/api/admin/qr-sessions/:token", {
   preHandler: authenticateAdmin
@@ -58,6 +77,18 @@ app.get("/api/admin/qr-sessions/:token", {
   }
 
   return session;
+});
+
+app.get("/api/public/qr-sessions/:token", async (request, reply) => {
+  const params = request.params as { token: string };
+
+  try {
+    return await getPublicSessionData(params.token);
+  } catch (error) {
+    return reply.code(400).send({
+      message: error instanceof Error ? error.message : "No fue posible cargar la sesion"
+    });
+  }
 });
 
 app.post("/api/admin/sap-sync/run", {
@@ -90,10 +121,12 @@ app.post("/api/public/register", async (request, reply) => {
   };
 
   try {
+    const clientContext = getClientContext(request);
     const result = await registerCustomerUpdate({
       ...body,
-      ipAddress: request.ip ?? null,
-      userAgent: request.headers["user-agent"] ?? null
+      ipAddress: clientContext.ipAddress,
+      userAgent: request.headers["user-agent"] ?? null,
+      deviceInfo: clientContext.deviceInfo
     });
 
     if (!result.ok) {
@@ -115,7 +148,13 @@ app.get("/api/public/consent/confirm", async (request, reply) => {
   }
 
   try {
-    await confirmConsent(query.token, request.ip ?? null, request.headers["user-agent"] ?? null);
+    const clientContext = getClientContext(request);
+    await confirmConsent(
+      query.token,
+      clientContext.ipAddress,
+      request.headers["user-agent"] ?? null,
+      clientContext.deviceInfo
+    );
     return reply.type("text/html").send(`
       <html lang="es">
         <head><meta charset="utf-8"><title>Confirmacion exitosa</title></head>

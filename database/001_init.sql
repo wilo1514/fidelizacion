@@ -24,6 +24,7 @@ BEGIN
     CREATE TABLE dbo.qr_sessions (
         id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWID(),
         session_token NVARCHAR(120) NOT NULL UNIQUE,
+        document_number NVARCHAR(50) NOT NULL,
         created_by_admin_id UNIQUEIDENTIFIER NULL,
         expires_at DATETIME2 NOT NULL,
         status NVARCHAR(30) NOT NULL DEFAULT 'OPEN',

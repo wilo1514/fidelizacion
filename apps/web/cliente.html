@@ -18,23 +18,23 @@
         <form id="customerForm" class="form-grid">
           <label>
             <span>Nombres y apellidos</span>
-            <input type="text" name="fullName" required />
+            <input id="fullName" type="text" name="fullName" required readonly />
           </label>
           <label>
             <span>Cedula, RUC o pasaporte</span>
-            <input type="text" name="documentNumber" required />
+            <input id="documentNumber" type="text" name="documentNumber" required readonly />
           </label>
           <label>
             <span>Celular</span>
-            <input type="tel" name="mobilePhone" required />
+            <input id="mobilePhone" type="tel" name="mobilePhone" required />
           </label>
           <label>
             <span>Correo</span>
-            <input type="email" name="email" required />
+            <input id="email" type="email" name="email" />
           </label>
           <label>
             <span>Direccion</span>
-            <input type="text" name="addressLine" required />
+            <input id="addressLine" type="text" name="addressLine" required />
           </label>
           <button type="submit" class="button button-primary">Confirmar informacion</button>
         </form>

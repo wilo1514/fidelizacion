@@ -17,6 +17,7 @@ type RegisterPayload = {
   acceptedTermsVersion: string;
   ipAddress: string | null;
   userAgent: string | null;
+  deviceInfo: string | null;
 };
 
 export async function registerCustomerUpdate(payload: RegisterPayload) {
@@ -60,7 +61,7 @@ export async function registerCustomerUpdate(payload: RegisterPayload) {
       .input("acceptedPolicyVersion", mssql.NVarChar(20), payload.acceptedPolicyVersion)
       .input("acceptedTermsVersion", mssql.NVarChar(20), payload.acceptedTermsVersion)
       .input("ipAddress", mssql.NVarChar(64), payload.ipAddress)
-      .input("userAgent", mssql.NVarChar(mssql.MAX), payload.userAgent)
+      .input("userAgent", mssql.NVarChar(mssql.MAX), payload.deviceInfo ?? payload.userAgent)
       .query(`
         MERGE dbo.customer_updates AS target
         USING (SELECT @qrSessionId AS qr_session_id) AS source
@@ -111,7 +112,7 @@ export async function registerCustomerUpdate(payload: RegisterPayload) {
     await new mssql.Request(transaction)
       .input("customerUpdateId", mssql.UniqueIdentifier, effectiveUpdateId)
       .input("ipAddress", mssql.NVarChar(64), payload.ipAddress)
-      .input("userAgent", mssql.NVarChar(mssql.MAX), payload.userAgent)
+      .input("userAgent", mssql.NVarChar(mssql.MAX), payload.deviceInfo ?? payload.userAgent)
       .query(`
         UPDATE dbo.customer_updates
         SET email_confirmation_sent_at = SYSUTCDATETIME()
@@ -169,7 +170,7 @@ export async function registerCustomerUpdate(payload: RegisterPayload) {
   }
 }
 
-export async function confirmConsent(publicToken: string, ipAddress: string | null, userAgent: string | null) {
+export async function confirmConsent(publicToken: string, ipAddress: string | null, userAgent: string | null, deviceInfo: string | null = null) {
   const pool = await getAppDbPool();
   const tokenHash = hashToken(publicToken);
   const tokenResult = await pool.request()
@@ -201,7 +202,7 @@ export async function confirmConsent(publicToken: string, ipAddress: string | nu
       .input("tokenId", mssql.UniqueIdentifier, token.id)
       .input("customerUpdateId", mssql.UniqueIdentifier, token.customer_update_id)
       .input("ipAddress", mssql.NVarChar(64), ipAddress)
-      .input("userAgent", mssql.NVarChar(mssql.MAX), userAgent)
+      .input("userAgent", mssql.NVarChar(mssql.MAX), deviceInfo ?? userAgent)
       .query(`
         UPDATE dbo.consent_email_tokens SET used_at = SYSUTCDATETIME() WHERE id = @tokenId;
 

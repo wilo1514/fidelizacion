@@ -45,6 +45,21 @@ ADD address_line NVARCHAR(300) NULL;
 GO
 ```
 
+Y para el nuevo flujo de QR por cedula agrega tambien:
+
+```sql
+USE [DB_Fidelizacion];
+GO
+ALTER TABLE dbo.qr_sessions
+ADD document_number NVARCHAR(50) NULL;
+GO
+
+UPDATE dbo.qr_sessions
+SET document_number = ''
+WHERE document_number IS NULL;
+GO
+```
+
 ### Login tecnico sugerido
 
 ```sql

@@ -11,16 +11,17 @@ El sistema debe permitir que un administrador genere un QR unico y temporal para
 
 ## Flujo principal
 
-1. El administrador genera un QR.
-2. El cliente escanea el QR y llena sus datos.
-3. El backend valida en ICG SQL Server si el cliente existe.
-4. Si no existe, responde `Verifique los datos ingresados`.
-5. Si existe, guarda en la base intermedia y envia un correo con enlace unico.
-6. El cliente confirma desde el correo.
-7. El administrador recupera la respuesta y valida la aceptacion.
-8. A las `22:00` y `05:00`, el sistema intenta actualizar SAP B1 via Service Layer.
-9. Si no encuentra el cliente en SAP, queda en cola de reintento.
-10. El administrador puede forzar manualmente una corrida desde el panel cuando necesite validar una carga fuera del horario programado.
+1. El administrador inicia sesion en el panel.
+2. El administrador ingresa la cedula y genera un QR.
+3. El cliente escanea el QR y ve sus datos precargados desde ICG.
+4. El backend valida en ICG SQL Server si el cliente existe.
+5. Si no existe, responde `Verifique los datos ingresados`.
+6. Si existe, guarda en la base intermedia y envia un correo con enlace unico.
+7. El cliente confirma desde el correo.
+8. El administrador recupera la respuesta y valida la aceptacion.
+9. A las `22:00` y `05:00`, el sistema intenta actualizar SAP B1 via Service Layer.
+10. Si no encuentra el cliente en SAP, queda en cola de reintento.
+11. El administrador puede forzar manualmente una corrida desde el panel cuando necesite validar una carga fuera del horario programado.
 
 ## Mapeo actual
 
