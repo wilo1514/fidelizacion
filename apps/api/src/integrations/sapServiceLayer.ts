@@ -12,7 +12,8 @@ type SapLoginResult = {
 type SapBpAddress = Record<string, unknown> & {
   RowNum: number;
   AddressName: string;
-  AdresType: string;
+  AdresType?: string;
+  AddressType?: string;
   Street: string;
 };
 
@@ -72,6 +73,10 @@ async function getBusinessPartnerAddresses(session: SapLoginResult, cardCode: st
   return body.BPAddresses ?? [];
 }
 
+function isShippingAddress(address: SapBpAddress) {
+  return address.AdresType === "S" || address.AddressType === "bo_ShipTo";
+}
+
 export async function updateBusinessPartnerByDocument(documentNumber: string, data: {
   mobilePhone: string;
   email: string;
@@ -116,7 +121,7 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
 
     if (data.addressLine) {
       const addresses = await getBusinessPartnerAddresses(session, partner.CardCode);
-      const hasShippingAddress = addresses.some((address) => address.AdresType === "S");
+      const hasShippingAddress = addresses.some((address) => isShippingAddress(address));
 
       if (!hasShippingAddress) {
         throw new Error(
@@ -127,7 +132,7 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
 
       const patchedAddresses = addresses.map((address) => ({
         ...address,
-        Street: address.AdresType === "S" ? data.addressLine : address.Street
+        Street: isShippingAddress(address) ? data.addressLine : address.Street
       }));
 
       const addressPatchResponse = await fetch(
@@ -151,7 +156,7 @@ export async function updateBusinessPartnerByDocument(documentNumber: string, da
       }
 
       const verifyAddresses = await getBusinessPartnerAddresses(session, partner.CardCode);
-      const shippingAddressesAfter = verifyAddresses.filter((address) => address.AdresType === "S");
+      const shippingAddressesAfter = verifyAddresses.filter((address) => isShippingAddress(address));
       const expectedStreet = data.addressLine.trim();
       const allUpdated = shippingAddressesAfter.every((address) => String(address.Street ?? "").trim() === expectedStreet);
 
