@@ -1,6 +1,6 @@
 import mssql from "mssql";
 import { getAppDbPool } from "../db.js";
-import { updateBusinessPartnerByTaxId } from "../integrations/sapServiceLayer.js";
+import { updateBusinessPartnerByDocument } from "../integrations/sapServiceLayer.js";
 
 export async function runSapSyncCycle() {
   const pool = await getAppDbPool();
@@ -11,7 +11,8 @@ export async function runSapSyncCycle() {
       cu.document_number,
       cu.full_name,
       cu.mobile_phone,
-      cu.email
+      cu.email,
+      cu.address_line
     FROM dbo.sap_sync_queue sq
     INNER JOIN dbo.customer_updates cu ON cu.id = sq.customer_update_id
     WHERE sq.sync_status IN ('PENDING', 'RETRY_PENDING')
@@ -21,10 +22,10 @@ export async function runSapSyncCycle() {
 
   for (const row of result.recordset) {
     try {
-      const sapResult = await updateBusinessPartnerByTaxId(row.document_number, {
-        fullName: row.full_name,
+      const sapResult = await updateBusinessPartnerByDocument(row.document_number, {
         mobilePhone: row.mobile_phone,
-        email: row.email
+        email: row.email,
+        addressLine: row.address_line
       });
 
       if (!sapResult.found) {

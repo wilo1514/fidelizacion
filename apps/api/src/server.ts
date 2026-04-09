@@ -66,6 +66,7 @@ app.post("/api/public/register", async (request, reply) => {
     documentNumber: string;
     mobilePhone: string;
     email: string;
+    addressLine: string;
     acceptedPolicyVersion: string;
     acceptedTermsVersion: string;
   };

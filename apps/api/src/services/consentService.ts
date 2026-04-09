@@ -12,6 +12,7 @@ type RegisterPayload = {
   documentNumber: string;
   mobilePhone: string;
   email: string;
+  addressLine: string;
   acceptedPolicyVersion: string;
   acceptedTermsVersion: string;
   ipAddress: string | null;
@@ -55,6 +56,7 @@ export async function registerCustomerUpdate(payload: RegisterPayload) {
       .input("documentNumber", mssql.NVarChar(50), payload.documentNumber)
       .input("mobilePhone", mssql.NVarChar(30), payload.mobilePhone)
       .input("email", mssql.NVarChar(200), payload.email)
+      .input("addressLine", mssql.NVarChar(300), payload.addressLine || null)
       .input("acceptedPolicyVersion", mssql.NVarChar(20), payload.acceptedPolicyVersion)
       .input("acceptedTermsVersion", mssql.NVarChar(20), payload.acceptedTermsVersion)
       .input("ipAddress", mssql.NVarChar(64), payload.ipAddress)
@@ -70,6 +72,7 @@ export async function registerCustomerUpdate(payload: RegisterPayload) {
             document_number = @documentNumber,
             mobile_phone = @mobilePhone,
             email = @email,
+            address_line = @addressLine,
             accepted_policy_version = @acceptedPolicyVersion,
             accepted_terms_version = @acceptedTermsVersion,
             ip_address = @ipAddress,
@@ -78,8 +81,8 @@ export async function registerCustomerUpdate(payload: RegisterPayload) {
             consent_status = 'PENDING',
             updated_at = SYSUTCDATETIME()
         WHEN NOT MATCHED THEN
-          INSERT (id, qr_session_id, icg_customer_code, full_name, document_number, mobile_phone, email, accepted_policy_version, accepted_terms_version, ip_address, user_agent)
-          VALUES (@customerUpdateId, @qrSessionId, @icgCode, @fullName, @documentNumber, @mobilePhone, @email, @acceptedPolicyVersion, @acceptedTermsVersion, @ipAddress, @userAgent);
+          INSERT (id, qr_session_id, icg_customer_code, full_name, document_number, mobile_phone, email, address_line, accepted_policy_version, accepted_terms_version, ip_address, user_agent)
+          VALUES (@customerUpdateId, @qrSessionId, @icgCode, @fullName, @documentNumber, @mobilePhone, @email, @addressLine, @acceptedPolicyVersion, @acceptedTermsVersion, @ipAddress, @userAgent);
       `);
 
     const currentUpdate = await new mssql.Request(transaction)

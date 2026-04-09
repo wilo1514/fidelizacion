@@ -35,6 +35,16 @@ Usaremos SQL Server, aprovechando el motor que ya tienes instalado.
 3. Crear un login tecnico para la aplicacion.
 4. Dar permisos solo sobre la base `Fidelizacion`.
 
+Si ya habias ejecutado una version anterior del script, agrega tambien esta columna:
+
+```sql
+USE [Fidelizacion];
+GO
+ALTER TABLE dbo.customer_updates
+ADD address_line NVARCHAR(300) NULL;
+GO
+```
+
 ### Login tecnico sugerido
 
 ```sql

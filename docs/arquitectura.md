@@ -21,6 +21,17 @@ El sistema debe permitir que un administrador genere un QR unico y temporal para
 8. A las `22:00` y `05:00`, el sistema intenta actualizar SAP B1 via Service Layer.
 9. Si no encuentra el cliente en SAP, queda en cola de reintento.
 
+## Mapeo actual
+
+- ICG `CLIENTES.NIF20` -> documento del cliente
+- ICG `CLIENTES.TELEFONO1` -> telefono
+- ICG `CLIENTES.E_MAIL` -> correo
+- ICG `CLIENTES.DIRECCION1` -> direccion
+- SAP `OCRD.U_DOCUMENTO` -> campo de busqueda
+- SAP `OCRD.Phone1` -> telefono a actualizar
+- SAP `OCRD.E_Mail` -> correo a actualizar
+- SAP `CRD1.Street` -> direccion a actualizar solo donde `AdresType = 'S'`
+
 ## Recomendaciones clave
 
 - Base intermedia: SQL Server.

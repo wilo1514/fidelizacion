@@ -43,6 +43,7 @@ BEGIN
         document_number NVARCHAR(50) NOT NULL,
         mobile_phone NVARCHAR(30) NOT NULL,
         email NVARCHAR(200) NOT NULL,
+        address_line NVARCHAR(300) NULL,
         source_system NVARCHAR(20) NOT NULL DEFAULT 'ICG',
         form_status NVARCHAR(30) NOT NULL DEFAULT 'PENDING_EMAIL_CONFIRMATION',
         consent_status NVARCHAR(30) NOT NULL DEFAULT 'PENDING',

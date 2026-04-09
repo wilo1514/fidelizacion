@@ -23,6 +23,7 @@ form?.addEventListener("submit", async (event) => {
     documentNumber: String(formData.get("documentNumber") ?? ""),
     mobilePhone: String(formData.get("mobilePhone") ?? ""),
     email: String(formData.get("email") ?? ""),
+    addressLine: String(formData.get("addressLine") ?? ""),
     acceptedPolicyVersion: "v1",
     acceptedTermsVersion: "v1"
   };

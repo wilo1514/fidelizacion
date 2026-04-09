@@ -3,6 +3,11 @@ import { config } from "../config.js";
 
 export type IcgCustomer = {
   code: string;
+  fullName: string | null;
+  documentNumber: string | null;
+  phone: string | null;
+  email: string | null;
+  addressLine: string | null;
 };
 
 let poolPromise: Promise<mssql.ConnectionPool> | null = null;
@@ -35,7 +40,13 @@ export async function findCustomerInIcg(documentNumber: string): Promise<IcgCust
     return null;
   }
 
+  const row = result.recordset[0] as Record<string, string | null>;
   return {
-    code: String(result.recordset[0].CodigoCliente ?? "")
+    code: String(row.CODCLIENTE ?? ""),
+    fullName: row.NOMBRECLIENTE ?? null,
+    documentNumber: row.NIF20 ?? null,
+    phone: row.TELEFONO1 ?? null,
+    email: row.E_MAIL ?? null,
+    addressLine: row.DIRECCION1 ?? null
   };
 }

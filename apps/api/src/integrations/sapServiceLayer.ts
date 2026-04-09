@@ -36,13 +36,14 @@ function cookieHeader(session: SapLoginResult) {
     : `B1SESSION=${session.sessionId}`;
 }
 
-export async function updateBusinessPartnerByTaxId(documentNumber: string, data: {
-  fullName: string;
+export async function updateBusinessPartnerByDocument(documentNumber: string, data: {
   mobilePhone: string;
   email: string;
+  addressLine: string | null;
 }) {
   const session = await login();
-  const filter = encodeURIComponent(`FederalTaxID eq '${documentNumber}'`);
+  const escapedDocument = documentNumber.replace(/'/g, "''");
+  const filter = encodeURIComponent(`U_DOCUMENTO eq '${escapedDocument}'`);
   const queryResponse = await fetch(`${config.sap.baseUrl}/BusinessPartners?$select=CardCode&$filter=${filter}`, {
     headers: { Cookie: cookieHeader(session) }
   });
@@ -52,27 +53,70 @@ export async function updateBusinessPartnerByTaxId(documentNumber: string, data:
   }
 
   const body = await queryResponse.json() as { value: Array<{ CardCode: string }> };
-  const partner = body.value[0];
+  const partners = body.value;
 
-  if (!partner) {
+  if (!partners.length) {
     return { found: false };
   }
 
-  const patchResponse = await fetch(`${config.sap.baseUrl}/BusinessPartners('${partner.CardCode}')`, {
-    method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Cookie: cookieHeader(session)
-    },
-    body: JSON.stringify({
-      CardName: data.fullName,
-      Cellular: data.mobilePhone,
-      EmailAddress: data.email
-    })
-  });
+  for (const partner of partners) {
+    const patchResponse = await fetch(`${config.sap.baseUrl}/BusinessPartners('${partner.CardCode}')`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookieHeader(session)
+      },
+      body: JSON.stringify({
+        Phone1: data.mobilePhone,
+        E_Mail: data.email
+      })
+    });
 
-  if (!patchResponse.ok) {
-    throw new Error(`SAP patch failed with status ${patchResponse.status}`);
+    if (!patchResponse.ok) {
+      throw new Error(`SAP patch failed with status ${patchResponse.status} for CardCode ${partner.CardCode}`);
+    }
+
+    if (data.addressLine) {
+      const addressFilter = encodeURIComponent(`CardCode eq '${partner.CardCode.replace(/'/g, "''")}' and AdresType eq 'S'`);
+      const addressResponse = await fetch(`${config.sap.baseUrl}/BPAddresses?$select=RowNum,CardCode,AddressName,AdresType,Street&$filter=${addressFilter}`, {
+        headers: { Cookie: cookieHeader(session) }
+      });
+
+      if (!addressResponse.ok) {
+        throw new Error(`SAP address query failed with status ${addressResponse.status} for CardCode ${partner.CardCode}`);
+      }
+
+      const addressBody = await addressResponse.json() as {
+        value: Array<{ RowNum: number; CardCode: string; AddressName: string; AdresType: string; Street: string }>;
+      };
+
+      for (const address of addressBody.value) {
+        const addressPatchResponse = await fetch(
+          `${config.sap.baseUrl}/BusinessPartners('${partner.CardCode}')`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Cookie: cookieHeader(session)
+            },
+            body: JSON.stringify({
+              BPAddresses: [
+                {
+                  RowNum: address.RowNum,
+                  AddressName: address.AddressName,
+                  AdresType: address.AdresType,
+                  Street: data.addressLine
+                }
+              ]
+            })
+          }
+        );
+
+        if (!addressPatchResponse.ok) {
+          throw new Error(`SAP address patch failed with status ${addressPatchResponse.status} for CardCode ${partner.CardCode}`);
+        }
+      }
+    }
   }
 
   return { found: true };
