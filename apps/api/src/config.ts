@@ -5,7 +5,14 @@ import dotenv from "dotenv";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+const envCandidates = [
+  path.resolve(__dirname, "../../../.env"),
+  path.resolve(__dirname, "../../.env")
+];
+
+for (const envPath of envCandidates) {
+  dotenv.config({ path: envPath, override: false });
+}
 
 function required(name: string): string {
   const value = process.env[name];
