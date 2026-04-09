@@ -3,63 +3,30 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Administrador | Fidelizacion</title>
+    <title>Login Administrador | Fidelizacion</title>
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
     <main class="layout admin-layout">
-      <section id="loginView" class="admin-shell">
-        <section class="hero">
-          <p class="eyebrow">Mega Tienda del Sur</p>
-          <h1>Acceso de administradores</h1>
-          <p class="lead">Ingresa con tu usuario y clave para generar el QR de actualizacion de datos.</p>
-        </section>
-
-        <section class="card login-card">
-          <form id="loginForm" class="form-grid">
-            <label>
-              <span>Usuario administrador</span>
-              <input id="adminUsername" type="text" autocomplete="username" required />
-            </label>
-            <label>
-              <span>Clave</span>
-              <input id="adminPassword" type="password" autocomplete="current-password" required />
-            </label>
-            <button type="submit" class="button button-primary">Ingresar</button>
-          </form>
-          <p id="loginMessage" class="feedback"></p>
-        </section>
+      <section class="hero">
+        <p class="eyebrow">Mega Tienda del Sur</p>
+        <h1>Acceso de administradores</h1>
+        <p class="lead">Ingresa con tu usuario y clave para continuar al panel de actualizacion de clientes.</p>
       </section>
 
-      <section id="dashboardView" class="admin-shell hidden">
-        <section class="hero">
-          <p class="eyebrow">Mega Tienda del Sur</p>
-          <h1>Panel de actualizacion de clientes</h1>
-          <p class="lead">Busca al cliente por cédula, genera un QR temporal y valida la aceptacion de politica y sorteo.</p>
-        </section>
-
-        <section class="card">
-          <div class="credentials-grid">
-            <label>
-              <span>Cedula del cliente</span>
-              <input id="documentNumber" type="text" inputmode="numeric" />
-            </label>
-          </div>
-          <div class="actions">
-            <button id="generateQrBtn" class="button button-primary">Generar QR</button>
-            <button id="refreshStatusBtn" class="button button-secondary">Recuperar respuesta</button>
-            <button id="forceSapSyncBtn" class="button button-secondary">Forzar carga SAP</button>
-            <button id="logoutBtn" class="button button-secondary">Cerrar sesion</button>
-          </div>
-
-          <div id="qrArea" class="qr-area">
-            <p>El QR aparecera aqui.</p>
-          </div>
-
-          <div id="statusArea" class="status-panel">
-            <p>Sin sesion activa.</p>
-          </div>
-        </section>
+      <section class="card login-card">
+        <form id="loginForm" class="form-grid">
+          <label>
+            <span>Usuario administrador</span>
+            <input id="adminUsername" type="text" autocomplete="username" required />
+          </label>
+          <label>
+            <span>Clave</span>
+            <input id="adminPassword" type="password" autocomplete="current-password" required />
+          </label>
+          <button type="submit" class="button button-primary">Ingresar</button>
+        </form>
+        <p id="loginMessage" class="feedback"></p>
       </section>
     </main>
     <script src="/admin.js" type="module"></script>

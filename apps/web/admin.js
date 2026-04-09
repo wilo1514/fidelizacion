@@ -1,5 +1,3 @@
-const loginView = document.getElementById("loginView");
-const dashboardView = document.getElementById("dashboardView");
 const loginForm = document.getElementById("loginForm");
 const loginMessage = document.getElementById("loginMessage");
 const qrArea = document.getElementById("qrArea");
@@ -14,6 +12,8 @@ const adminPassword = document.getElementById("adminPassword");
 
 let activeToken = null;
 const storageKey = "fidelizacion_admin_auth";
+const isLoginPage = Boolean(loginForm);
+const isDashboardPage = Boolean(generateQrBtn);
 
 function saveAuth() {
   sessionStorage.setItem(storageKey, JSON.stringify({
@@ -32,16 +32,6 @@ function restoreAuth() {
   if (adminUsername) adminUsername.value = auth.username ?? "";
   if (adminPassword) adminPassword.value = auth.password ?? "";
   return Boolean(auth.username && auth.password);
-}
-
-function showDashboard() {
-  loginView?.classList.add("hidden");
-  dashboardView?.classList.remove("hidden");
-}
-
-function showLogin() {
-  dashboardView?.classList.add("hidden");
-  loginView?.classList.remove("hidden");
 }
 
 function adminHeaders() {
@@ -68,7 +58,7 @@ loginForm?.addEventListener("submit", async (event) => {
 
   saveAuth();
   loginMessage.textContent = "";
-  showDashboard();
+  window.location.href = "/admin-panel.html";
 });
 
 generateQrBtn?.addEventListener("click", async () => {
@@ -148,15 +138,15 @@ forceSapSyncBtn?.addEventListener("click", async () => {
 logoutBtn?.addEventListener("click", () => {
   sessionStorage.removeItem(storageKey);
   activeToken = null;
-  qrArea.innerHTML = "<p>El QR aparecera aqui.</p>";
-  statusArea.innerHTML = "<p>Sin sesion activa.</p>";
-  showLogin();
+  window.location.href = "/";
 });
 
-if (restoreAuth()) {
-  showDashboard();
-} else {
-  showLogin();
+if (isDashboardPage && !restoreAuth()) {
+  window.location.href = "/";
+}
+
+if (isLoginPage && restoreAuth()) {
+  window.location.href = "/admin-panel.html";
 }
 
 function renderStatus(data) {
