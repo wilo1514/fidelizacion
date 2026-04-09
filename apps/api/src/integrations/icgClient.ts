@@ -21,8 +21,8 @@ async function getPool() {
       user: config.icg.user,
       password: config.icg.password,
       options: {
-        trustServerCertificate: true,
-        encrypt: false
+        trustServerCertificate: !config.icg.encrypt,
+        encrypt: config.icg.encrypt
       }
     }).connect();
   }

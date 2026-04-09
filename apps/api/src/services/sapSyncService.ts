@@ -20,7 +20,13 @@ export async function runSapSyncCycle() {
     ORDER BY sq.created_at
   `);
 
+  let processed = 0;
+  let synced = 0;
+  let failed = 0;
+  let notFound = 0;
+
   for (const row of result.recordset) {
+    processed += 1;
     try {
       const sapResult = await updateBusinessPartnerByDocument(row.document_number, {
         mobilePhone: row.mobile_phone,
@@ -41,6 +47,7 @@ export async function runSapSyncCycle() {
                 updated_at = SYSUTCDATETIME()
             WHERE id = @queueId
           `);
+        notFound += 1;
         continue;
       }
 
@@ -56,6 +63,7 @@ export async function runSapSyncCycle() {
               updated_at = SYSUTCDATETIME()
           WHERE id = @queueId
         `);
+      synced += 1;
     } catch (error) {
       const message = error instanceof Error
         ? `${error.name}: ${error.message}`
@@ -73,6 +81,14 @@ export async function runSapSyncCycle() {
               updated_at = SYSUTCDATETIME()
           WHERE id = @queueId
         `);
+      failed += 1;
     }
   }
+
+  return {
+    processed,
+    synced,
+    failed,
+    notFound
+  };
 }

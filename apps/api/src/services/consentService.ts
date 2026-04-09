@@ -124,18 +124,45 @@ export async function registerCustomerUpdate(payload: RegisterPayload) {
     await transaction.commit();
 
     const confirmUrl = `${config.publicBaseUrl}/api/public/consent/confirm?token=${publicToken}`;
-    const mailResult = await sendConsentEmail(payload.email, payload.fullName, confirmUrl);
 
-    await pool.request()
-      .input("customerUpdateId", mssql.UniqueIdentifier, effectiveUpdateId)
-      .input("recipientEmail", mssql.NVarChar(200), payload.email)
-      .input("providerMessageId", mssql.NVarChar(200), String(mailResult.messageId ?? ""))
-      .query(`
-        INSERT INTO dbo.outbound_email_log (customer_update_id, recipient_email, email_type, delivery_status, provider_message_id, sent_at)
-        VALUES (@customerUpdateId, @recipientEmail, 'CONSENT_CONFIRMATION', 'SENT', @providerMessageId, SYSUTCDATETIME())
-      `);
+    try {
+      const mailResult = await sendConsentEmail(payload.email, payload.fullName, confirmUrl);
 
-    return { ok: true, message: "Se envio un correo de confirmacion al cliente" };
+      await pool.request()
+        .input("customerUpdateId", mssql.UniqueIdentifier, effectiveUpdateId)
+        .input("recipientEmail", mssql.NVarChar(200), payload.email)
+        .input("providerMessageId", mssql.NVarChar(200), String(mailResult.messageId ?? ""))
+        .query(`
+          INSERT INTO dbo.outbound_email_log (customer_update_id, recipient_email, email_type, delivery_status, provider_message_id, sent_at)
+          VALUES (@customerUpdateId, @recipientEmail, 'CONSENT_CONFIRMATION', 'SENT', @providerMessageId, SYSUTCDATETIME())
+        `);
+
+      return { ok: true, message: "Se envio un correo de confirmacion al cliente" };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Email send failed";
+
+      await pool.request()
+        .input("customerUpdateId", mssql.UniqueIdentifier, effectiveUpdateId)
+        .input("sessionId", mssql.UniqueIdentifier, session.id)
+        .input("recipientEmail", mssql.NVarChar(200), payload.email)
+        .input("errorMessage", mssql.NVarChar(mssql.MAX), errorMessage)
+        .query(`
+          UPDATE dbo.customer_updates
+          SET form_status = 'EMAIL_FAILED',
+              updated_at = SYSUTCDATETIME()
+          WHERE id = @customerUpdateId;
+
+          UPDATE dbo.qr_sessions
+          SET status = 'EMAIL_FAILED',
+              last_status_at = SYSUTCDATETIME()
+          WHERE id = @sessionId;
+
+          INSERT INTO dbo.outbound_email_log (customer_update_id, recipient_email, email_type, delivery_status, error_message)
+          VALUES (@customerUpdateId, @recipientEmail, 'CONSENT_CONFIRMATION', 'FAILED', @errorMessage);
+        `);
+
+      return { ok: false, message: "No fue posible enviar el correo de confirmacion" };
+    }
   } catch (error) {
     await transaction.rollback();
     throw error;

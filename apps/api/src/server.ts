@@ -64,8 +64,11 @@ app.post("/api/admin/sap-sync/run", {
   preHandler: authenticateAdmin
 }, async (_request, reply) => {
   try {
-    await runSapSyncCycle();
-    return { ok: true, message: "Sincronizacion SAP ejecutada correctamente" };
+    const result = await runSapSyncCycle();
+    return {
+      ok: true,
+      message: `Sincronizacion SAP ejecutada. Procesados: ${result.processed}, sincronizados: ${result.synced}, no encontrados: ${result.notFound}, con error: ${result.failed}`
+    };
   } catch (error) {
     return reply.code(500).send({
       ok: false,
