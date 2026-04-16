@@ -34,6 +34,12 @@ El sistema debe permitir que un administrador genere un QR unico y temporal para
 - SAP `OCRD.E_Mail` -> correo a actualizar
 - SAP `CRD1.Street` -> direccion a actualizar solo donde `AdresType = 'S'`
 
+## Version legal actual
+
+- Politica de proteccion de datos: `DAT001-P`
+- Esa version se guarda en `customer_updates.accepted_policy_version`
+- Esa version tambien se usa en `accepted_terms_version` mientras compartan el mismo control documental
+
 ## Recomendaciones clave
 
 - Base intermedia: SQL Server.

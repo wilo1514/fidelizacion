@@ -3,6 +3,7 @@ const message = document.getElementById("formMessage");
 const modal = document.getElementById("consentModal");
 const confirmConsentBtn = document.getElementById("confirmConsentBtn");
 const acceptCheckbox = document.getElementById("acceptCheckbox");
+const successMessage = document.getElementById("successMessage");
 const fullNameInput = document.getElementById("fullName");
 const documentNumberInput = document.getElementById("documentNumber");
 const mobilePhoneInput = document.getElementById("mobilePhone");
@@ -51,8 +52,8 @@ form?.addEventListener("submit", async (event) => {
     mobilePhone: String(formData.get("mobilePhone") ?? ""),
     email: String(formData.get("email") ?? ""),
     addressLine: String(formData.get("addressLine") ?? ""),
-    acceptedPolicyVersion: "v1",
-    acceptedTermsVersion: "v1"
+    acceptedPolicyVersion: "DAT001-P",
+    acceptedTermsVersion: "DAT001-P"
   };
 
   modal?.showModal();
@@ -75,7 +76,8 @@ confirmConsentBtn?.addEventListener("click", async () => {
 
   if (response.ok) {
     modal?.close();
-    loadSessionData();
+    form?.classList.add("hidden");
+    successMessage?.classList.remove("hidden");
   }
 });
 
