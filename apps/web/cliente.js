@@ -76,7 +76,10 @@ confirmConsentBtn?.addEventListener("click", async () => {
 
   if (response.ok) {
     modal?.close();
-    form?.classList.add("hidden");
+    if (form) {
+      form.classList.add("hidden");
+      form.style.display = "none";
+    }
     successMessage?.classList.remove("hidden");
   }
 });

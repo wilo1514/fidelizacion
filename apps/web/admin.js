@@ -162,13 +162,42 @@ if (isLoginPage && restoreAuth()) {
   window.location.href = "/admin-panel.html";
 }
 
+function maskName(value) {
+  if (!value) return "-";
+  return value
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => {
+      if (part.length <= 2) return `${part[0] ?? ""}X`;
+      return `${part[0]}${"X".repeat(Math.max(1, part.length - 2))}${part.slice(-1)}`;
+    })
+    .join(" ");
+}
+
+function maskDocument(value) {
+  if (!value) return "-";
+  if (value.length <= 2) return `${value[0] ?? ""}X`;
+  return `${value[0]}${"X".repeat(Math.max(1, value.length - 2))}${value.slice(-1)}`;
+}
+
+function maskEmail(value) {
+  if (!value || !value.includes("@")) return "-";
+  const [local, domain] = value.split("@");
+  if (!local || !domain) return "-";
+
+  const visibleLocal = local.slice(0, 2);
+  const maskedLocal = `${visibleLocal}${"X".repeat(Math.max(1, local.length - visibleLocal.length))}`;
+
+  return `${maskedLocal}@${domain}`;
+}
+
 function renderStatus(data) {
   statusArea.innerHTML = `
     <p><strong>Estado de sesion:</strong> ${data.status ?? "OPEN"}</p>
     <p><strong>Estado de formulario:</strong> ${data.form_status ?? "Sin respuesta"}</p>
     <p><strong>Estado de consentimiento:</strong> ${data.consent_status ?? "Pendiente"}</p>
-    <p><strong>Cliente:</strong> ${data.full_name ?? "-"}</p>
-    <p><strong>Documento:</strong> ${data.customer_document_number ?? data.document_number ?? "-"}</p>
-    <p><strong>Correo:</strong> ${data.email ?? "-"}</p>
+    <p><strong>Cliente:</strong> ${maskName(data.full_name)}</p>
+    <p><strong>Documento:</strong> ${maskDocument(data.customer_document_number ?? data.document_number)}</p>
+    <p><strong>Correo:</strong> ${maskEmail(data.email)}</p>
   `;
 }
